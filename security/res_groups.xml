@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2020 Tecnativa - Ernesto Tejeda
+     License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl). -->
+<odoo>
+    <record id="fleet_booking_module_category" model="ir.module.category">
+        <field name="name">Fleet Booking</field>
+        <field name="description">Fleet Booking</field>
+    </record>
+    <!-- Access Groups -->
+    <record id="fleet_booking_group_user" model="res.groups">
+        <field name="name">User</field>
+        <field name="comment">the user can edit the route but cannot create or delete them.</field>
+        <field name="category_id" ref="fleet_booking_module_category"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <record id="fleet_booking_group_admin" model="res.groups">
+        <field name="name">Admin</field>
+        <field name="comment">the user can create routes emergency.</field>
+        <field name="category_id" ref="fleet_booking_module_category"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+    </record>
+</odoo>

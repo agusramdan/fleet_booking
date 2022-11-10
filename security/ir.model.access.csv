@@ -1,0 +1,11 @@
+"id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
+"access_fleet_booking_group_user","fleet_booking group_user","model_fleet_booking","base.group_user",1,0,0,0
+"access_fleet_booking_group_admin","fleet_booking group_system","model_fleet_booking","fleet_booking_group_admin",1,1,1,1
+"access_fleet_booking_group_goods_user","fleet_booking_goods group_system","model_fleet_booking_goods","fleet_booking_group_user",1,1,0,0
+"access_fleet_booking_group_goods_admin","fleet_booking_goods group_system","model_fleet_booking_goods","fleet_booking_group_admin",1,1,1,1
+"access_fleet_booking_group_waypoint_user","fleet_booking_waypoint group_system","model_fleet_booking_waypoint","fleet_booking_group_user",1,1,0,0
+"access_fleet_booking_group_waypoint_admin","fleet_booking_waypoint group_system","model_fleet_booking_waypoint","fleet_booking_group_admin",1,1,1,1
+"access_fleet_booking_group_trip_user","fleet_booking_trip group_system","model_fleet_booking_trip","fleet_booking_group_user",1,1,0,0
+"access_fleet_booking_group_trip_admin","fleet_booking_trip group_system","model_fleet_booking_trip","fleet_booking_group_admin",1,1,1,1
+"access_fleet_booking_group_trip_go_user","fleet_booking_trip_goods group_system","model_fleet_booking_trip_goods","fleet_booking_group_user",1,1,0,0
+"access_fleet_booking_group_trip_go_admin","fleet_booking_trip_goods group_system","model_fleet_booking_trip_goods","fleet_booking_group_admin",1,1,1,1

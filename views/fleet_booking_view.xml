@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="view_fleet_booking_tree" model="ir.ui.view">
+        <field name="model">fleet.booking</field>
+        <field name="arch" type="xml">
+            <tree string="Booking Order">
+                <field name="name" />
+                <field name="origin_id" />
+                <field name="destination_id" />
+                <field name="multi_pickup" readonly="1"/>
+                <field name="multi_drop" readonly="1" />
+                <field name="multi_drop" readonly="1" />
+                <field name="route_status" readonly="1" />      
+            </tree>
+        </field>
+    </record>
+    <record id="view_fleet_booking_form" model="ir.ui.view">
+        <field name="model">fleet.booking</field>
+        <field name="arch" type="xml">
+            <form string="Booking Order">
+                <header>
+                                            
+                    <button name="action_generate_waypoint" type="object" string="Generate Waypoint"   />
+                    <button name="action_unlink_waypoints" type="object" string="Delete All Waypoint"   /> 
+                    <button name="action_validate_route" type="object" string="Validate Route"  /> 
+
+                    <button name="action_generate_trip" type="object" string="Generate Trip"   />
+                    <button name="action_unlink_trips" type="object" string="Delete All Trip"   />
+
+                    <field name="state"  
+                    widget="statusbar"
+                     options="{'clickable': '0'}" 
+                     readonly="1"/>
+                </header>
+                <sheet>
+                    
+                    <div class="oe_button_box" name="button_box">
+                        <button
+                            name="toggle_active"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-archive"
+                        >
+                            <field
+                                name="active"
+                                widget="boolean_button"
+                                options='{"terminology": "active"}'
+                            />
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" default_focus="1" />
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="multi_pickup" readonly="1"/>
+                            <field name="multi_drop" readonly="1" />
+                            <field name="multi_trip" readonly="1" />
+                            <field name="route_status" readonly="1" />
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Package List" name="goods_ids">
+                            <group>
+                                <field
+                                    name="goods_ids"
+                                    nolabel="1" 
+                                >   
+                                    <form>
+                                        <field name="sequence" invisible="1" />
+                                        <field name="booking_id" invisible="1" />
+                                        <field name="pickup_id" />
+                                        <field name="drop_id" />
+                                        <field name="dogs" />
+                                    </form>
+                                    <tree editable="bottom">
+                                        <field name="sequence" widget="handle" />
+                                        <field name="id" optional="hide" />
+                                        <field name="route_issue" optional="hide"  readonly="1"/>
+                                        <field name="booking_id" invisible="1" />
+                                        <field name="pickup_id" optional="hide" />
+                                        <field name="able_to_pickup" optional="hide" readonly="1"/>
+                                        <field name="drop_id" optional="hide" />
+                                        <field name="able_to_deliver" optional="hide"  readonly="1"/>
+                                        <field name="dogs" />
+                                    </tree>
+                                </field>
+                            </group>
+                        </page>
+                        <page string="Route/Waypoint" name="waypoint_ids">
+
+                            <group>
+                                <field name="issue_goods_ids" > 
+                                    <tree >
+                                        <field name="id" optional="hide" />
+                                        <field name="booking_id" invisible="1" />
+                                        <field name="pickup_id" readonly="1"  />
+                                        <field name="drop_id" readonly="1" />
+                                        <field name="dogs" readonly="1" />
+                                        <field name="able_to_pickup" readonly="1" optional="show" />
+                                        <field name="able_to_deliver" readonly="1" optional="show" />
+                                        <field name="route_issue" readonly="1" optional="hide" />
+                                        <button name="add_waypoint" type="object" string="Add Waypoint" class="oe_highlight" 
+                                        title="waypoint" />
+                                    </tree>
+                                </field>
+                            </group>
+                            <group>
+                                <field
+                                    name="waypoint_ids"
+                                    nolabel="1" 
+                                >   
+                                    <tree editable="bottom" create="false">
+                                        <field name="sequence" widget="handle" />
+                                        <field name="id" optional="hide" />
+                                        <field name="booking_id" invisible="1" />
+                                        <field name="waypoint_id" readonly="1" /> 
+                                        <field name="pickup_point" readonly="1" /> 
+                                        <field name="drop_point" readonly="1" />  
+                                    </tree>
+                                </field>
+                            </group>
+                             
+                        </page>
+
+                        <page string="Trip" name="Trips">
+
+
+                            <group>
+                                <field name="origin_id" readonly="1"/>
+                                <field name="destination_id" readonly="1"/>
+                                <field
+                                    name="waypoint_readonly_ids"
+                                    readonly="1"
+                                >   
+                                    <form>
+                                       <group>
+                                            <field name="sequence" readonly="1"  />
+                                            <field name="id" optional="hide"/>
+                                            <field name="booking_id"  invisible="1" />
+                                            <field name="waypoint_id"  readonly="1" /> 
+                                            <field name="pickup_point" readonly="1"  /> 
+                                            <field name="drop_point" readonly="1"  />  
+                                        </group>
+                                    </form>
+                                    <tree >
+                                        <field name="id" optional="hide" />
+                                        <field name="booking_id" invisible="1"  />
+                                        <field name="waypoint_id"  /> 
+                                        <field name="pickup_point"  /> 
+                                        <field name="drop_point" />  
+                                    </tree>
+                                </field>
+                            </group>
+                            <group>
+                                <field
+                                    name="trip_ids"
+                                    nolabel="1" 
+                                    readonly="1"
+                                >   
+                                    <form >
+                                        <group>
+                                            <field name="sequence" invisible="1"  />
+                                            <field name="id" invisible="1" />
+                                            <field name="origin_id" readonly="1" />
+                                            <field name="destination_id" readonly="1" /> 
+                                        </group>
+                                        <group>
+                                            <field
+                                                name="goods_ids"
+                                                nolabel="1" 
+                                                readonly="1"
+                                            > 
+                                                <tree >
+                                                    <field name="sequence" widget="handle" />
+                                                    <field name="id" optional="hide" />
+                                                    <field name="booking_goods_dogs" readonly="1"/>
+                                                    <field name="pickup_id" readonly="1"/>
+                                                    <field name="drop_id" readonly="1"/>
+                                                    <field name="pickup_trip" readonly="1" />
+                                                    <field name="drop_trip" readonly="1" />
+                                                    <field name="via_trip" readonly="1" />
+                                                </tree>
+                                            </field>
+                                        </group>
+                                    </form>
+                                    <tree >
+                                        <field name="sequence" widget="handle" />
+                                        <field name="id" optional="hide" />
+                                        <field name="origin_id" readonly="1" />
+                                        <field name="destination_id" readonly="1" /> 
+                                        <field name="pickup_trip" readonly="1" optional="hide" />
+                                        <field name="drop_trip" readonly="1" optional="hide"/> 
+                                    </tree>
+                                </field>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_fleet_booking" model="ir.actions.act_window">
+        <field name="name">Booking</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">fleet.booking</field>
+        <field name="view_mode">tree,form,pivot</field>
+        <field name="domain">[]</field>
+    </record>
+
+    <menuitem
+        action="action_fleet_booking"
+        id="menu_fleet_booking"
+        name="Booking"
+        parent="fleet.fleet_vehicles"
+        sequence="20"
+    />
+
+    <!-- http://localhost:8069/web#cids=1&menu_id=411&action=517&model=fleet.booking&view_type=list -->
+</odoo>

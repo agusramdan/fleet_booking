@@ -1,0 +1,9 @@
+"id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
+"access_fleet_booking_group_user","fleet_booking group_user","model_fleet_booking","base.group_user",1,0,0,0
+"access_fleet_booking_group_route_user","fleet_booking group_system","model_fleet_booking","fleet_booking_group_user",1,1,0,0
+"access_fleet_booking_group_route_driver","fleet_booking group_user","model_fleet_booking","fleet_booking_group_user",1,1,1,0
+"access_fleet_booking_group_route_admin","fleet_booking group_system","model_fleet_booking","fleet_booking_group_manager",1,1,1,1
+"access_fleet_booking_item_group_user","fleet_booking group_user","model_partner_route_item","base.group_user",1,0,0,0
+"access_fleet_booking_item_group_route_user","fleet_booking group_system","model_partner_route_item","fleet_booking_group_user",1,1,1,1
+"access_fleet_booking_item_group_route_driver","fleet_booking group_user","model_partner_route_item","fleet_booking_group_operation",1,1,1,1
+"access_fleet_booking_item_group_route_admin","fleet_booking group_system","model_partner_route_item","fleet_booking_group_manager",1,1,1,1
