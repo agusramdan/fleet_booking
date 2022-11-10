@@ -157,6 +157,7 @@
                                     </tree>
                                 </field>
                             </group>
+                            
                             <group>
                                 <field
                                     name="trip_ids"
@@ -170,24 +171,75 @@
                                             <field name="origin_id" readonly="1" />
                                             <field name="destination_id" readonly="1" /> 
                                         </group>
-                                        <group>
-                                            <field
-                                                name="goods_ids"
-                                                nolabel="1" 
-                                                readonly="1"
-                                            > 
-                                                <tree >
-                                                    <field name="sequence" widget="handle" />
-                                                    <field name="id" optional="hide" />
-                                                    <field name="booking_goods_dogs" readonly="1"/>
-                                                    <field name="pickup_id" readonly="1"/>
-                                                    <field name="drop_id" readonly="1"/>
-                                                    <field name="pickup_trip" readonly="1" />
-                                                    <field name="drop_trip" readonly="1" />
-                                                    <field name="via_trip" readonly="1" />
-                                                </tree>
-                                            </field>
-                                        </group>
+                                         <notebook>
+                                                <page string="Package List" name="trip_goods_ids">
+                                                
+                                                    <group>
+                                                        <field
+                                                            name="trip_goods_ids"
+                                                            nolabel="1" 
+                                                            readonly="1"
+                                                        > 
+                                                            <tree >
+                                                                <field name="sequence" widget="handle" />
+                                                                <field name="id" optional="hide" />
+                                                                <field name="booking_goods_dogs" readonly="1"/>
+                                                                <field name="pickup_id" readonly="1"/>
+                                                                <field name="drop_id" readonly="1"/>
+                                                                <field name="pickup_trip" readonly="1" />
+                                                                <field name="drop_trip" readonly="1" />
+                                                                <field name="via_trip" readonly="1" />
+                                                            </tree>
+                                                        </field>
+                                                    </group>
+                                            </page>
+                                            <page string="Cost/Revenue" name="trip_cost_ids">
+                                                <group>
+                                                    <field
+                                                        name="trip_cost_ids"
+                                                        nolabel="1" 
+                                                    >   
+                                                        <form >
+                                                            <group>
+                                                                <field name="sequence" invisible="1"  />
+                                                                <field name="id" invisible="1" />
+                                                                <field name="booking_id" invisible="1" />
+                                                                <field name="booking_trip_id"  invisible="1" />
+                                                                <field name="cost_type"   />
+                                                                <field name="revenue"  />
+                                                                <field name="estimation"  />
+                                                                <field name="description"  /> 
+                                                                <field name="amount"  />
+                                                            </group>
+                                                            
+                                                        </form>
+                                                        <tree >
+                                                            <field name="sequence" widget="handle" />
+                                                            <field name="id" optional="hide" />
+                                                            <field name="booking_id" invisible="1" />
+                                                            <field name="booking_trip_id"  invisible="1"  />
+                                                            <field name="cost_type"   />
+                                                            <field name="revenue" optional="hide" />
+                                                            <field name="estimation" optional="hide" />
+                                                            <field name="description"   /> 
+                                                            <field name="amount"   /> 
+                                                        </tree>
+                                                    </field>
+                                                </group>
+                                            </page>
+
+
+
+
+
+
+
+
+
+
+
+                                        </notebook>
+                                                
                                     </form>
                                     <tree >
                                         <field name="sequence" widget="handle" />
@@ -196,6 +248,40 @@
                                         <field name="destination_id" readonly="1" /> 
                                         <field name="pickup_trip" readonly="1" optional="hide" />
                                         <field name="drop_trip" readonly="1" optional="hide"/> 
+                                    </tree>
+                                </field>
+                            </group>
+                        </page>
+                        <page string="Cost/Revenue" name="booking_cost">
+                            <group>
+                                <field
+                                    name="cost_ids"
+                                    nolabel="1" 
+                                >   
+                                    <form >
+                                        <group>
+                                            <field name="sequence" invisible="1"  />
+                                            <field name="id" invisible="1" />
+                                            <field name="booking_id" invisible="1" />
+                                            <field name="booking_trip_id"   domain="[ ('booking_id', '=', booking_id)]" />
+                                            <field name="cost_type"   />
+                                            <field name="revenue"  />
+                                            <field name="estimation"  />
+                                            <field name="description"  /> 
+                                            <field name="amount"  />
+                                        </group>
+                                         
+                                    </form>
+                                    <tree >
+                                        <field name="sequence" widget="handle" />
+                                        <field name="id" optional="hide" />
+                                        <field name="booking_id" invisible="1" />
+                                        <field name="booking_trip_id"   domain="[ ('booking_id', '=', booking_id)]" />
+                                        <field name="cost_type"   />
+                                        <field name="revenue" optional="hide" />
+                                        <field name="estimation" optional="hide" />
+                                        <field name="description"   /> 
+                                        <field name="amount"   /> 
                                     </tree>
                                 </field>
                             </group>

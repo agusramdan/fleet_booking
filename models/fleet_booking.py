@@ -96,6 +96,13 @@ class FleetBooking(models.Model):
         inverse_name="booking_id",
         string="Trips",
     )
+
+    cost_ids = fields.One2many(
+        comodel_name="fleet.booking.cost",
+        inverse_name="booking_id",
+        string="Cost/Revenue",
+    )
+
     @api.depends("multi_pickup","multi_drop")
     def _compute_multi_trip(self):
         for record in self:
@@ -148,6 +155,8 @@ class FleetBooking(models.Model):
         self.flush()
 
     def action_generate_waypoint(self):
+        origin_ids = []
+        destination_ids = []
         pickup_ids = []
         drop_ids = []
         new_waypoint = []
@@ -163,19 +172,29 @@ class FleetBooking(models.Model):
                     drop_ids.append(drop_id)
 
         for id in pickup_ids :
-            if id not in new_waypoint :  
+            if id not in drop_ids and id not in new_waypoint:
+                if id not in origin_ids :
+                    origin_ids.append(id)
+                else :  
                     new_waypoint.append(id)
+
         for id in drop_ids :
             if id not in new_waypoint :  
-                    new_waypoint.append(id)
+                if id not in pickup_ids : destination_ids.append(id)
+                else: new_waypoint.append(id)
+        print  (origin_ids)
+        print  (new_waypoint)
+        print  (destination_ids)
+        
+        waypoints = origin_ids + new_waypoint + destination_ids
         wp_ids= []
         sequence = -1
         for record in self.waypoint_ids :
             sequence = record.sequence 
             if record.waypoint_id :
-                new_waypoint = [value for value in new_waypoint if value != record.waypoint_id.id ]
+                waypoints = [value for value in waypoints if value != record.waypoint_id.id ]
         
-        for waypoint in new_waypoint :
+        for waypoint in waypoints :
             sequence = sequence + 1
             wp_ids.append((0,0,{'sequence':sequence,'waypoint_id': waypoint}))
             
@@ -190,7 +209,6 @@ class FleetBooking(models.Model):
         self._compute_multi_trip()
         self.route_status = "open"
         route_status="valid_route"
-        origin_id = 0 
         waypoint_ids = []
         for wp in self.waypoint_ids :
             data = {
@@ -261,24 +279,47 @@ class FleetBooking(models.Model):
             trips = []
             last_waypoint = None
             sequence=0
+            booking_id = self.id
+            first_waypoint = None
             if self.waypoint_ids :
                 for waypoint in self.waypoint_ids :                    
                     if last_waypoint :
-                        trip = {
-                            'sequence':sequence ,
-                            'origin_id':last_waypoint.waypoint_id.id,
-                            'wp_origin_id':last_waypoint.id ,                      
-                            'destination_id':waypoint.waypoint_id.id,
-                            'wp_destination_id':waypoint.id
-                        }
-                        sequence = sequence +1
-                        trips.append((0,0,trip))  
-                   
-                    last_waypoint = waypoint
+                        trip_origin_id = last_waypoint.waypoint_id.id
+                        trip_destination_id = waypoint.waypoint_id.id
+                        old_trip = self.env['fleet.booking.trip'].sudo().search([
+                            ('booking_id','=', booking_id),
+                            ('origin_id', '=', trip_origin_id),
+                            ('destination_id', '=', trip_destination_id)
+                            ])
+                        sequence = sequence +1    
+                        if old_trip.exists() :
+                            trip = {
+                                'sequence':sequence ,
+                            }
+                            trips.append((1,old_trip.id,trip))
+                        else:
+                            trip = {
+                                'sequence':sequence ,
+                                'origin_id':trip_origin_id,
+                                'wp_origin_id':last_waypoint.id ,                      
+                                'destination_id':trip_destination_id,
+                                'wp_destination_id':waypoint.id
+                            }
+                            
+                            trips.append((0,0,trip))  
+                    else :
+                        first_waypoint = waypoint
 
+                    last_waypoint = waypoint
+            self.origin_id = first_waypoint.waypoint_id
+            self.destination_id =last_waypoint.waypoint_id
             self.trip_ids=trips
+
             self.flush()
             self._generate_trip_package()
+        else:
+            raise ValidationError("Generate Trip Requered Valid Route status")
+
 
     def _generate_trip_package(self):    
         """
@@ -286,46 +327,80 @@ class FleetBooking(models.Model):
         """
  
         booking_id = self.id
+        
         for goods in self.goods_ids:
             """
                 Iterasi setiap barang untuk di masukan pada trip
             """
             is_pickup = False 
-
+            is_drop=False
             for trip in self.trip_ids:
                 """
                     Iterasi setiap barang untuk di masukan pada trip
                 """
                 is_curtrip_pickup = False
                 is_curtrip_drop = False
-                 
+
                 if not is_pickup :
                     "Check pickup"
                     if trip.origin_id.id == goods.pickup_id.id :
                         "Chek"
                         is_curtrip_pickup=True
                         is_pickup = True
-                if is_pickup :
+                if is_pickup and not is_drop:
                     "chek drop"
                     if trip.destination_id.id == goods.drop_id.id :
                         "Chek"
                         is_curtrip_drop=True
-                
-                    trip.goods_ids= [(0,0,{
-                        'sequence': goods.sequence,
-                        'booking_id': booking_id,
-                        'booking_goods_id': goods.id, 
-                        'pickup_trip': is_curtrip_pickup,
-                        'drop_trip': is_curtrip_drop,
-                        'via_trip' : not (is_curtrip_pickup or is_curtrip_drop )
-                    })]
+
+                    old_trip = self.env['fleet.booking.trip.goods'].sudo().search([
+                            ('booking_id','=', booking_id),
+                            ('booking_trip_id', '=', trip.id), 
+                            ('booking_goods_id', '=', goods.id), 
+                            ])
+                    if old_trip.exists() :
+                        trip.trip_goods_ids= [(1,old_trip.id,{
+                            'pickup_trip': is_curtrip_pickup,
+                            'drop_trip': is_curtrip_drop,
+                            'via_trip' : not (is_curtrip_pickup or is_curtrip_drop )
+                        })]
+                    else :
+                        trip.trip_goods_ids= [(0,0,{
+                            'sequence': goods.sequence,
+                            'booking_id': booking_id,
+                            'booking_goods_id': goods.id, 
+                            'pickup_trip': is_curtrip_pickup,
+                            'drop_trip': is_curtrip_drop,
+                            'via_trip' : not (is_curtrip_pickup or is_curtrip_drop )
+                        })]
+                    
                 if is_curtrip_pickup: 
                     trip.pickup_trip = True
+
+                
                 if is_curtrip_drop : 
                     trip.drop_trip = True 
-                    break
+                    is_drop=True
+                elif is_drop or not is_pickup:
+                    "Clean up last data"
+                    old_trip = self.env['fleet.booking.trip.goods'].sudo().search([
+                            ('booking_id','=', booking_id),
+                            ('booking_trip_id', '=', trip.id), 
+                            ('booking_goods_id', '=', goods.id), 
+                    ])
+                    if old_trip.exists() : 
+                        old_trip.unlink()
+                       
+                
 
-        self.flush()          
+
+        self.flush()   
+
+    def action_generate_job_order(self):
+        self.action_validate_route()
+        if "valid_route" != self.route_status :
+            raise ValidationError("Generate  Job Order Requered Valid Route status")
+
  
 
 class FleetBookingGoods(models.Model):
@@ -461,12 +536,16 @@ class FleetBookingTrip(models.Model):
         required=False,
     )
 
-    goods_ids = fields.One2many(
+    trip_goods_ids = fields.One2many(
         comodel_name="fleet.booking.trip.goods",
         inverse_name="booking_trip_id",
-        string="Package List",
+        string="Trip Package List",
     )
-    
+    trip_cost_ids = fields.One2many(
+        comodel_name="fleet.booking.cost",
+        inverse_name="booking_trip_id",
+        string="Trip Cost/Revenue",
+    )
     pickup_trip = fields.Boolean("Pickup Trip")
     drop_trip = fields.Boolean('Drop Trip')
 
@@ -518,6 +597,44 @@ class FleetBookingTrip(models.Model):
     pickup_trip = fields.Boolean("Pickup This Trip")
     drop_trip = fields.Boolean('Drop This Trip')
     via_trip = fields.Boolean('Via This Trip')
+
+class FleetBookingCost(models.Model):
+    _name = "fleet.booking.cost" 
+    _description = "Cost or Revenue"
+    _order = "sequence , booking_id"
+
+    sequence = fields.Integer()
+    estimation = fields.Boolean("Estimation")
+    revenue = fields.Boolean("Revenue")
+    booking_id = fields.Many2one(
+        comodel_name="fleet.booking",
+        string="Booking Trip",
+        required=False,
+        ondelete='set null',
+    )
+    cost_type = fields.Selection(
+        string='Cost/Revenue Type',
+        selection=[
+            ("revenue", "Delevery Good Revenue"),
+            ("discount", "Discount"),
+            ("charge_to_client", "Charge To Client (Aditional Cost)"),
+            ("trip_charge", "Trip Charge To Client (Aditional Cost)"),
+            ("internal_cost", "Internal Cost"),
+            ("trip_cost", "Trip Cost"),  
+        ],
+        default="internal_cost"
+    )
+
+    booking_trip_id = fields.Many2one(
+        comodel_name="fleet.booking.trip",
+        string="Booking Trip",
+        required=False,
+        ondelete='set null',
+    )
+
+    description = fields.Char("Description")
+    amount = fields.Float("Amount")
+
 
 
     
