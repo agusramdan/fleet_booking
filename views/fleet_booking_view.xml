@@ -6,6 +6,7 @@
         <field name="arch" type="xml">
             <tree string="Booking Order">
                 <field name="name" />
+                <field name="vehicle_id" />
                 <field name="origin_id" />
                 <field name="destination_id" />
                 <field name="multi_pickup" readonly="1"/>
@@ -56,6 +57,7 @@
                     </div>
                     <group>
                         <group>
+                            <field name="vehicle_id" />
                             <field name="multi_pickup" readonly="1"/>
                             <field name="multi_drop" readonly="1" />
                             <field name="multi_trip" readonly="1" />
@@ -90,7 +92,7 @@
                                 </field>
                             </group>
                         </page>
-                        <page string="Route/Waypoint" name="waypoint_ids">
+                        <page string="Route/Stop Point" name="waypoint_ids">
 
                             <group>
                                 <field name="issue_goods_ids" > 

@@ -17,11 +17,12 @@ class FleetBooking(models.Model):
 
     #driver_id = fields.Many2one('res.partner', 'Driver',  help='Driver address of the vehicle', copy=False)
     
-    # vehicle_id = fields.Many2one(
-    #     comodel_name="fleet.vehicle",
-    #     string="Vehicle",
-    #     required=True,
-    # )
+    vehicle_id = fields.Many2one(
+        comodel_name="fleet.vehicle",
+        string="Vehicle",
+        required=False,
+        copy=False
+    )
 
     # master_route_id = fields.Many2one(
     #     comodel_name="route.planner",
@@ -66,6 +67,7 @@ class FleetBooking(models.Model):
         comodel_name="fleet.booking.goods",
         inverse_name="booking_id",
         string="Package List",
+        copy=True
     )
 
     issue_goods_ids = fields.One2many(
@@ -288,13 +290,7 @@ class FleetBooking(models.Model):
             """
                 Iterasi setiap barang untuk di masukan pada trip
             """
-            is_pickup = False
-            is_origin_pickup = False
-            if goods.pickup_id : is_origin_pickup = goods.pickup_id.id == self.origin_id.id
-            else : is_origin_pickup = True
-            is_destination_drop = False
-            if goods.drop_id : is_destination_drop = goods.drop_id.id == self.destination_id.id
-            else : is_destination_drop =  True
+            is_pickup = False 
 
             for trip in self.trip_ids:
                 """
@@ -316,13 +312,15 @@ class FleetBooking(models.Model):
                         is_curtrip_drop=True
                 
                     trip.goods_ids= [(0,0,{
+                        'sequence': goods.sequence,
                         'booking_id': booking_id,
                         'booking_goods_id': goods.id, 
                         'pickup_trip': is_curtrip_pickup,
                         'drop_trip': is_curtrip_drop,
                         'via_trip' : not (is_curtrip_pickup or is_curtrip_drop )
                     })]
-                if is_curtrip_pickup: trip.pickup_trip = True
+                if is_curtrip_pickup: 
+                    trip.pickup_trip = True
                 if is_curtrip_drop : 
                     trip.drop_trip = True 
                     break
